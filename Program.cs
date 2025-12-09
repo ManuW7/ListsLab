@@ -2,13 +2,13 @@
 
 // Подключаем нужное пространство имен и даем псевдонимы
 
-using Person = DoubleLinksListNamespace.PersonData;
-using Position = DoubleLinksListNamespace.Position<DoubleLinksListNamespace.PersonData>;
-using List = DoubleLinksListNamespace.List<DoubleLinksListNamespace.PersonData>;
+//using Person = DoubleLinksListNamespace.PersonData;
+//using Position = DoubleLinksListNamespace.Position<DoubleLinksListNamespace.PersonData>;
+//using List = DoubleLinksListNamespace.List<DoubleLinksListNamespace.PersonData>;
 
-//using Person = CursorListNamespace.PersonData;
-//using Position = CursorListNamespace.Position<CursorListNamespace.PersonData>;
-//using List = CursorListNamespace.List<CursorListNamespace.PersonData>;
+using Person = CursorListNamespace.PersonData;
+using Position = CursorListNamespace.Position<CursorListNamespace.PersonData>;
+using List = CursorListNamespace.List<CursorListNamespace.PersonData>;
 
 namespace Lab1
 {

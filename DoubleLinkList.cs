@@ -34,9 +34,9 @@
 
     public class Node<T>
     {
-        private T data { get; set; }
-        private Node<T>? previous;
-        private Node<T>? next;
+        public T data;
+        public Node<T>? previous;
+        public Node<T>? next;
 
         public Node(T data)
         {
@@ -45,30 +45,6 @@
             next = null;
         }
 
-        public T getData()
-        {
-            return this.data;
-        }
-
-        public Node<T>? getPrevious()
-        {
-            return previous;
-        }
-
-        public void setPrevious(Node<T>? previous)
-        {
-            this.previous = previous;
-        }
-
-        public Node<T>? getNext()
-        {
-            return next;
-        }
-
-        public void setNext(Node<T>? next)
-        {
-            this.next = next;
-        }
 
 
     }
@@ -96,6 +72,21 @@
             tail = null;
         }
 
+        //Вспомогательные методы
+
+        // Проверка, есть ли такой элемент в списке
+        private bool PositionIsValid(Position<T> p)
+        {
+            Node<T> currentNode = this.head;
+            while (currentNode != null) {
+                if (currentNode == p.position)
+                {
+                    return true;
+                }
+                currentNode = currentNode.next;
+            }
+            return false;
+        }
 
         public Position<T> End()
         {
@@ -119,8 +110,8 @@
                 // Если при этом список не пустой
                 else
                 {
-                    newNode.setPrevious(this.tail);
-                    this.tail.setNext(newNode);
+                    newNode.previous = (this.tail);
+                    this.tail.next = (newNode);
                     this.tail = newNode;
                 }
             }
@@ -130,35 +121,32 @@
                 // Если вставляем в head
                 if (p.position == head)
                 {
-                    this.head.setPrevious(newNode);
-                    newNode.setNext(this.head);
+                    this.head.previous = (newNode);
+                    newNode.next = (this.head);
                     this.head = newNode;
                 }
                 // Если вставляем в tail
                 else if (p.position == tail)
                 {
-                    this.tail.getPrevious().setNext(newNode);
-                    newNode.setPrevious(this.tail.getPrevious());
-                    newNode.setNext(this.tail);
-                    this.tail.setPrevious(newNode);
+                    this.tail.previous.next = (newNode);
+                    newNode.previous = (this.tail.previous);
+                    newNode.next = (this.tail);
+                    this.tail.previous = (newNode);
                 }
 
                 // Если не позиция после последнего, не head и не tail:
                 else
                 {
-                    // Нужно пройтись по элементам, начиная с head, если есть элемент на такой позиции, то вставить туда
-                    Node<T> currentNode = this.head;
-
-                    while (currentNode != null)
-                    {
-                        if (currentNode == p.position)
-                        {
-                            currentNode.getPrevious().setNext(newNode);
-                            newNode.setPrevious(currentNode.getPrevious());
-                            newNode.setNext(currentNode);
-                            currentNode.setPrevious(newNode);
-                        }
-                        currentNode = currentNode.getNext();
+                    // Если в списке есть такая позиция
+                    if (this.PositionIsValid(p)){
+                        // В предыдущий для p элемент записываем ссылку на вставялемый элемент
+                        p.position.previous.next = newNode;
+                        // Во вставляемый узел записываем ссылку на предыдущий элемент
+                        newNode.previous = (p.position.previous);
+                        // В следующий для всталяемого элемента вставляем элемент, который был на позиции p
+                        newNode.next = p.position;
+                        // В предыдущий для элемента по адресу p записываем новый
+                        p.position.previous = newNode;
                     }
                 }
             }
@@ -170,41 +158,32 @@
             // Начинаем с головы
             Node<T> current = this.head;
 
-            // Идем по узлам пока не придем в хвост (следующий не будет null)
+            // Идем по узлам пока не придем в хвост
             while (current != null)
             {
                 // Если текущий элемент - искомый - возвращаем его позицию
-                if (current.getData().Equals(x))
+                if (current.data.Equals(x))
                 {
                     return new Position<T>(current);
                 }
                 // Переходим к следующему
-                current = current.getNext();
+                current = current.next;
             }
             // Если так и не нашли - возвращаем позицию после последнего
             return End();
         }
 
+
+
         public T Retrieve(Position<T> p)
         {
-            // Переменная для искомого узла
-            Node<T> searchedNode = p.position;
-            // Начинаем с головы
-            Node<T> currentNode = this.head;
-            // Идем по узлам, пока не станет null (пока не пришли в последний)
-            while (currentNode != null)
+            // Проверяем, если есть в списке элемент с такой позицией 
+            if (this.PositionIsValid(p))
             {
-                // Если текущий узел - искомый, возвращаем обьект внутри узла
-                if (currentNode == searchedNode)
-                {
-                    return currentNode.getData();
-                }
-
-                // Переходим к следующему
-                currentNode = currentNode.getNext();
+                // Если есть, возвращаем его содержимое
+                return p.position.data;
             }
-
-            // Если не нашли узла в такой позиции в текущем списке - возвращаем пустой обьект
+            // Если нет
             return default(T);
 
         }
@@ -215,7 +194,7 @@
             if (p.position == this.head)
             {
                 // Если при этом следующего элемента нет, то список теперь пустой
-                if (this.head.getNext() == null)
+                if (this.head.next == null)
                 {
                     this.head = null;
                     this.tail = null;
@@ -223,9 +202,9 @@
                 else
                 {
                     // Если же есть, то узел Следующий после head теперь head
-                    this.head = this.head.getNext();
+                    this.head = this.head.next;
                     // Теперь у этого элемента нет предыдущего
-                    this.head.setPrevious(null);
+                    this.head.previous = (null);
                 }
 
             }
@@ -233,31 +212,21 @@
             else if (p.position == this.tail)
             {
                 // То хвост теперь - предыдущий элемент, он точно есть
-                this.tail = this.tail.getPrevious();
+                this.tail = this.tail.previous;
                 // У нового хвоста теперь нет следующего элемента
-                this.tail.setNext(null);
+                this.tail.next = (null);
             }
             // Если и не хвост и не голова
             else
             {
-                // Надо начиная с головы пройти по элементам, найти, если есть, элемент в позиции P и удалить его
-                Node<T> currentNode = this.head;
-
-                while (currentNode != null)
+                // Проверяем, есть ли такая позиция в списке
+                if (this.PositionIsValid(p))
                 {
-                    // Если мы нашли элемент по такой позиции
-                    if (currentNode == p.position)
-                    {
-                        // То его предыдущий элемент теперь ведет на его следующий элемент
-                        currentNode.getPrevious().setNext(currentNode.getNext());
-                        // А его следующий элемент теперь ведет на его предыдущий элемент
-                        currentNode.getNext().setPrevious(currentNode.getPrevious());
-                        // Завершаем цикл
-                        break;
-                    }
-                    // Если же этого не произошло, переходим к следующему
-                    currentNode = currentNode.getNext();
+                    // Если есть, то элемент, предыдущий для нее, теперь ведет на элемент следующий для нее и наоборот
+                    p.position.previous.next = p.position.next;
+                    p.position.next.previous = p.position.previous;
                 }
+
             }
         }
 
@@ -272,33 +241,22 @@
             // Если же не хвост, идем от головы до нужного элемента, если он есть - возвращаем next
             else
             {
-                Node<T> currentNode = this.head;
-                while (currentNode != null)
+                // Если такой элемент есть
+                if (this.PositionIsValid(p))
                 {
-                    if (currentNode == p.position  )
-                    {
-                        return new Position<T>(currentNode.getNext());
-                    }
-                    currentNode = currentNode.getNext();
+                    return new Position<T>(p.position.next);
                 }
-                return null;
             }
 
+            return null;
         }
 
         public Position<T> Previous(Position<T> p)
         {
-            // Идем с хвоста, пока не станет head, проверяя является ли текущий элемент p
-            Node<T> currentNode = this.tail;
-
-            while (currentNode != this.head)
+            // В списке есть такая позиция? 
+            if (this.PositionIsValid(p))
             {
-                // Если да, возвращаем его предыдущий элемент
-                if (currentNode == p.position)
-                {
-                    return new Position<T>(currentNode.getPrevious());
-                }
-                currentNode = currentNode.getPrevious();
+                return new Position<T>(p.position.previous);
             }
             // Если так и не нашли
             return null;
@@ -306,7 +264,7 @@
 
         public Position<T> MakeNull()
         {
-            // Делаем голову и хвост пустыми, возвразаем позицию после последнего
+            // Делаем голову и хвост пустыми, возвращаем позицию после последнего
             this.head = this.tail = null;
             return End();
         }
@@ -323,8 +281,8 @@
             Node<T> currentNode = this.head;
             while (currentNode != null)
             {
-                Console.WriteLine(currentNode.getData());
-                currentNode = currentNode.getNext();
+                Console.WriteLine(currentNode.data);
+                currentNode = currentNode.next;
             }
         }
     }

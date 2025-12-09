@@ -110,7 +110,7 @@
         // Вспомогательные методы
 
         // Метод для проверки наличия позиции в данном списке
-        private Boolean PositionIsValid(Position<T> p)
+        private bool PositionIsValid(Position<T> p)
         {
             int currentNode = this.start;
 
