@@ -26,7 +26,6 @@
 
         public override string ToString()
         {
-            // Превращаем char[] в строку и убираем лишние нули
             string nameStr = new string(Name).TrimEnd('\0');
             string addressStr = new string(Address).TrimEnd('\0');
             return $"Name: {nameStr}, Address: {addressStr}";
@@ -76,17 +75,8 @@
 
     public class Position<T>
     {
-        private Node<T>? position;
+        public Node<T>? position;
 
-        public Node<T>? getPosition()
-        {
-            return position;
-        }
-
-        public void setPosition(Node<T>? position)
-        {
-            this.position = position;
-        }
 
         public Position(Node<T> position)
         {
@@ -118,7 +108,7 @@
 
 
             // Если переданная позиция - это позиция после последнего
-            if (p.getPosition() == null)
+            if (p.position == null)
             {
                 // Если при этом список пустой
                 if (this.head == null)
@@ -138,14 +128,14 @@
             else
             {
                 // Если вставляем в head
-                if (p.getPosition() == head)
+                if (p.position == head)
                 {
                     this.head.setPrevious(newNode);
                     newNode.setNext(this.head);
                     this.head = newNode;
                 }
                 // Если вставляем в tail
-                else if (p.getPosition() == tail)
+                else if (p.position == tail)
                 {
                     this.tail.getPrevious().setNext(newNode);
                     newNode.setPrevious(this.tail.getPrevious());
@@ -161,7 +151,7 @@
 
                     while (currentNode != null)
                     {
-                        if (currentNode == p.getPosition())
+                        if (currentNode == p.position)
                         {
                             currentNode.getPrevious().setNext(newNode);
                             newNode.setPrevious(currentNode.getPrevious());
@@ -198,7 +188,7 @@
         public T Retrieve(Position<T> p)
         {
             // Переменная для искомого узла
-            Node<T> searchedNode = p.getPosition();
+            Node<T> searchedNode = p.position;
             // Начинаем с головы
             Node<T> currentNode = this.head;
             // Идем по узлам, пока не станет null (пока не пришли в последний)
@@ -222,7 +212,7 @@
         public void Delete(Position<T> p)
         {
             // Проверяем, если переданная позиция - голова
-            if (p.getPosition() == this.head)
+            if (p.position == this.head)
             {
                 // Если при этом следующего элемента нет, то список теперь пустой
                 if (this.head.getNext() == null)
@@ -240,7 +230,7 @@
 
             }
             // если мы удаляем хвост
-            else if (p.getPosition() == this.tail)
+            else if (p.position == this.tail)
             {
                 // То хвост теперь - предыдущий элемент, он точно есть
                 this.tail = this.tail.getPrevious();
@@ -256,7 +246,7 @@
                 while (currentNode != null)
                 {
                     // Если мы нашли элемент по такой позиции
-                    if (currentNode == p.getPosition())
+                    if (currentNode == p.position)
                     {
                         // То его предыдущий элемент теперь ведет на его следующий элемент
                         currentNode.getPrevious().setNext(currentNode.getNext());
@@ -274,7 +264,7 @@
         public Position<T> Next(Position<T> p)
         {
             // Если нам передали хвост
-            if (p.getPosition() == this.tail)
+            if (p.position == this.tail)
             {
                 // Возвращаем позицию после последнего
                 return End();
@@ -285,7 +275,7 @@
                 Node<T> currentNode = this.head;
                 while (currentNode != null)
                 {
-                    if (currentNode == p.getPosition())
+                    if (currentNode == p.position  )
                     {
                         return new Position<T>(currentNode.getNext());
                     }
@@ -304,7 +294,7 @@
             while (currentNode != this.head)
             {
                 // Если да, возвращаем его предыдущий элемент
-                if (currentNode == p.getPosition())
+                if (currentNode == p.position)
                 {
                     return new Position<T>(currentNode.getPrevious());
                 }

@@ -73,82 +73,122 @@
 
     public class Position<T>
     {
-        private int index;
+        public int position;
         public Position(int index)
         {
-            this.index = index;
-        }
-
-        public int getPosition()
-        {
-            return index;
-        }
-
-        public void setPosition(int value)
-        {
-            this.index = value;
+            this.position = index;
         }
     }
 
     public class List<T>
     {
         private int start;
-        private int space;
-        private Node<T>[] list;
-        private int SIZE = 50;
+        private const int SIZE = 50;
 
-        public List()
+        private static int space;
+        private static Node<T>[] list;
+
+        static List()
         {
-            list = new Node<T>[this.SIZE];
+            list = new Node<T>[SIZE];
 
-            for (int i = 0; i < this.SIZE; i++)
+            for (int i = 0; i < SIZE; i++)
             {
                 list[i] = new Node<T>();
                 list[i].setNext(i + 1);
             }
-            list[this.SIZE - 1].setNext(-1);
-            this.start = -1;
-            this.space = 0;
+            list[SIZE - 1].setNext(-1);
+
+            space = 0;
         }
+
+        public List()
+        {
+            this.start = -1;
+        }
+        
+        // Вспомогательные методы
+
+        // Метод для проверки наличия позиции в данном списке
+        private Boolean PositionIsValid(Position<T> p)
+        {
+            int currentNode = this.start;
+
+            while (currentNode != -1) {
+                if (currentNode == p.position)
+                {
+                    return true;
+                }
+                currentNode = list[currentNode].getNext();
+            }
+
+            return false;
+        }
+
+
+        // Метод для возврата позиции последнего элемента в списке
+        private Position<T> Last()
+        {
+            int currentNode = this.start;
+
+            while (currentNode != -1)
+            {
+                if (list[currentNode].getNext() == -1)
+                {
+                    return new Position<T>(currentNode);
+                }
+                currentNode = list[currentNode].getNext();
+            }
+
+            // Если список пустой
+            return null;
+        }
+
+        // Метод для поиска предыдущего узла для узла по данной позиции
+        private Position<T> GetPreviousPosition(Position<T> p)
+        {
+            int currentNode = this.start;
+            while (currentNode != -1)
+            {
+                if (list[currentNode].getNext() == p.position)
+                {
+                    return new Position<T>(currentNode);
+                }
+                currentNode = list[currentNode].getNext();
+            }
+
+            return null;
+        }
+
+
 
         public Position<T> End()
         {
             return new Position<T>(-1);
         }
 
-        public void Insert(Position<T> p, T x)
+        public void Insert(Position<T> p, T x)  
         {
             // Если вставляемая позиция - это позиция после последнего
-            if (p.getPosition() == -1)
+            if (p.position == -1)
             {
-                // Если есть свободная ячейка, вставляем в нее
-                if (this.space != -1)
+                // Сохраняем номер ячейки, которая сейчас первая свободная
+                int nodeToInsert = space;
+                // В space сохраняем номер следующей свободной ячейки
+                space = list[space].getNext();
+                // Сохраняем в ячейку передаваемое значение
+                list[nodeToInsert].setData(x);
+                list[nodeToInsert].setNext(-1);
+                // Если при этом список был пустой, сохраняем в start ячейку
+                if (this.start == -1)
                 {
-                    // Сохраняем номер ячейки, которая сейчас первая свободная
-                    int nodeToInsert = this.space;
-                    // В space сохраняем номер следующей свободной ячейки
-                    this.space = this.list[this.space].getNext();
-                    // Сохраняем в ячейку передаваемое значение
-                    this.list[nodeToInsert].setData(x);
-                    this.list[nodeToInsert].setNext(-1);
-                    // Если при этом список был пустой, сохраняем в Start ячейку
-                    if (this.start == -1)
-                    {
-                        this.start = nodeToInsert;
-                    }
-                    // Если нет, то нужно пройтись по элементам, найти тот, который ведет на -1, записать туда номер текущей ячейки
-                    else
-                    {
-                        int currentNode = this.start;
-                        while (this.list[currentNode].getNext() != -1)
-                        {
-                            currentNode = this.list[currentNode].getNext();
-                        }
-
-                        // Когда нашли, теперь этот элемент ведет в тот, куда вставляем
-                        this.list[currentNode].setNext(nodeToInsert);
-                    }
-
+                    this.start = nodeToInsert;
+                }
+                // Если нет, то нужно найти последний, записать туда номер текущей ячейки
+                else
+                {
+                    int last = this.Last().position;
+                    list[last].setNext(nodeToInsert);
                 }
 
 
@@ -156,39 +196,23 @@
             // Если вставляем не в позицию после последнего
             else
             {
-                // Будем вставлять только если в списке есть свободное место
-                if (this.space != -1)
+                int nodeToInsert = p.position;
+
+                // Если такая позиция есть в списке
+                if (this.PositionIsValid(p))
                 {
-                    int nodeToInsert = p.getPosition();
-                    // пойдем с головы по элементам списка, чтобы проверить, есть ли вообще такая позиция в списке
-                    int currentNode = this.start;
-                    while (currentNode != -1)
-                    {
-                        // Если нашли такой элемент
-                        if (currentNode == nodeToInsert)
-                        {
-                            // В пустую ячейку вставляем то, что раньше было во вставляемой
-                            this.list[this.space].setData(this.list[nodeToInsert].getData());
-                            // Следующая для вставляемой ячейки будет space
-                            this.list[nodeToInsert].setNext(this.space);
-                            // Теперь пустая ячейка - та, на которую укзаывает пустая
-                            this.space = this.list[this.space].getNext();
-                            // Записываем собственно данные в ячейку p
-                            this.list[nodeToInsert].setData(x);
-
-                            // Если вставляемая позиция раньше была головой, нужно поменять голову
-                            if (nodeToInsert == this.start)
-                            {
-                                this.start = this.list[nodeToInsert].getNext();
-                            }
-
-                            // После чего можно дальше не идти
-                            break;
-                        }
-                        // Переходим к слеждующему элементу
-                        currentNode = this.list[currentNode].getNext();
-                    }
-
+                    // В пустую ячейку вставляем то, что раньше было во вставляемой
+                    list[space].setData(list[nodeToInsert].getData());
+                    // Сохраним то, куда сейчас ведет space 
+                    int nextSpace = list[space].getNext();
+                    // Теперь ячейка, которая была пустой, ведет туда, куда вела вставляемая ячейка
+                    list[space].setNext(list[nodeToInsert].getNext());
+                    // Следующая для вставляемой ячейки будет space
+                    list[nodeToInsert].setNext(space);
+                    // Обновляем space
+                    space = nextSpace;
+                    // Записываем собственно данные в ячейку p
+                    list[nodeToInsert].setData(x);
 
                 }
 
@@ -198,34 +222,30 @@
         public Position<T> Locate(T x)
         {
             // Проходим от начала по элементам, если нашли нужный, выводим позицию
-            int currentNode = this.start;
+            int currentNode = start;
 
             while (currentNode != -1)
             {
-                if (this.list[currentNode].getData().Equals(x))
+                if (list[currentNode].getData().Equals(x))
                 {
                     return new Position<T>(currentNode);
                 }
 
-                currentNode = this.list[currentNode].getNext();
+                currentNode = list[currentNode].getNext();
             }
 
             return End();
         }
 
+
         public T Retrieve(Position<T> p)
         {
-            int currentNode = this.start;
-
-            while (currentNode != -1)
-            {
-                if (currentNode == p.getPosition())
-                {
-                    return this.list[currentNode].getData();
-                }
-                currentNode = this.list[currentNode].getNext();
+            // Если в данном списке есть node с таким индексом, возвращаем содержимое node
+            if (this.PositionIsValid(p)){
+                return list[p.position].getData();
             }
 
+            // Если нет, то 
             return default(T);
 
         }
@@ -233,108 +253,74 @@
         public void Delete(Position<T> p)
         {
             // Если мы удаляем start
-            if (this.start == p.getPosition())
+            if (this.start == p.position)
             {
                 int prevStart = this.start;
 
                 // Записываем в start следующий для start элемент
-                this.start = this.list[this.start].getNext();
+                this.start = list[this.start].getNext();
 
                 // там где раньше был start теперь пустая ячейка, которая ведет в предыдущий Space
-                this.list[prevStart].setNext(this.space);
+                list[prevStart].setNext(space);
                 // Теперь space - это то, что было стартом
-                this.space = prevStart;
+                space = prevStart;
             }
-            // Если же мы удаляем не старт,пойдем по элементам, пока следующий не станет удаляемым
+            // Если же мы удаляем не старт
             else
             {
-                // Начнем со старта
-                int currentElement = this.start;
-
-                // Будем рассматривать элементы, следующий для текущего
-                // Пока элемент, следующий для текущего не равен -1
-                while (this.list[currentElement].getNext() != -1)
-                {
-                    // Если элемент, следующий для текущего - удаляемый
-                    if (this.list[currentElement].getNext() == p.getPosition())
-                    {
-                        // Сохраним удаляемый элемент
-                        int deleteNode = p.getPosition();
-
-                        // Теперь предыдущий для него элемент должен вести в следующий для него элемент
-                        this.list[currentElement].setNext(this.list[deleteNode].getNext());
-
-                        //Сам удаляемвй элемент теперь должен вести в Space
-                        this.list[deleteNode].setNext(this.space);
-
-                        // Теперь позиция удаленного элемента - это space
-                        this.space = deleteNode;
-                        return;
-                    }
-                    currentElement = this.list[currentElement].getNext();
+                // Если такая позиция в списке есть
+                if (this.PositionIsValid(p)){
+                    // Найдем позицию узла, предыдущего для узла по данной позиции
+                    int prevNodePosition = this.GetPreviousPosition(p).position;
+                    // В ячейку по найденной позиции запишем ссылку на следующий элемент для p
+                    list[prevNodePosition].setNext(list[p.position].getNext());
+                    // Удаляемая ячейка теперь свободна, можно добавить ее в качестве space
+                    list[p.position].setNext(space);
+                    space = p.position;
                 }
             }
+
         }
 
         public Position<T> Next(Position<T> p)
         {
-            int currentNode = this.start;
-            while (currentNode != -1)
+            // Если такая позиция в списке есть
+            if (this.PositionIsValid(p))
             {
-                if (currentNode == p.getPosition())
+                // Если она - последняя
+                if (this.Last().position == p.position)
                 {
-                    if (this.list[currentNode].getNext() == -1)
-                    {
-                        return End();
-                    }
-                    return new Position<T>(this.list[currentNode].getNext());
+                    // Возвращаем позицию после последнего
+                    return End();
                 }
-                currentNode = this.list[currentNode].getNext();
+                // Если же нет
+                return new Position<T>(list[p.position].getNext());
+                
             }
+
+            // Если такой позиции в списке нет - результат неопределен
             return null;
+
         }
 
         public Position<T> Previous(Position<T> p)
         {
-            // Если вводимая позиция - не старт
-            if (p.getPosition() != this.start)
-            {
-                int currentItem = this.start;
-                // Пока элемент, следующий за текущим не будет -1
-                while (this.list[currentItem].getNext() != -1)
-                {
-                    // Если элемент, следующий за текущим - искомый, то возвращаем текущий
-                    if (this.list[currentItem].getNext() == p.getPosition())
-                    {
-                        return new Position<T>(currentItem);
-                    }
-                    currentItem = this.list[currentItem].getNext();
-                }
-            }
+            return this.GetPreviousPosition(p);
 
-            // Если так ничего и не вернули
-            return null;
         }
 
         public Position<T> makeNull()
         {
-            // Теперь последний элемент списка должен вести в space
-            int currentItem = this.start;
-
-            // Доходим до последнего элемента списка
-            while (this.list[currentItem].getNext() != -1)
+            // Если список не пустой
+            if (this.start != -1)
             {
-                currentItem = this.list[currentItem].getNext();
+                // Находим последний элемент списка
+                int lastElement = this.Last().position;
+                // Он теперь ведет в Space
+                list[lastElement].setNext(space);
+                // Space теперь - начало этого списка
+                space = this.start;
             }
-
-            // Он теперь ведет в space
-            this.list[currentItem].setNext(this.space);
-
-            // Space теперь то, что было start
-
-            this.space = this.start;
-            this.start = -1;
-
             return End();
         }
 
@@ -349,8 +335,8 @@
 
             while (currentNode != -1)
             {
-                Console.WriteLine(this.list[currentNode].getData());
-                currentNode = this.list[currentNode].getNext();
+                Console.WriteLine(list[currentNode].getData());
+                currentNode = list[currentNode].getNext();
             }
         }
     }
